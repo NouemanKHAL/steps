@@ -16,8 +16,6 @@ import (
 const stackpulseSource = "STACKPULSE"
 
 type EventPost struct {
-	ApiKey         string   `env:"DD_API_KEY,required"`
-	Site           bool     `env:"DD_SITE"`
 	Title          string   `env:"TITLE,required"`
 	Text           string   `env:"TEXT,required"`
 	Tags           []string `env:"TAGS"`
@@ -49,25 +47,17 @@ func (s *EventPost) Run() (int, []byte, error) {
 		SourceTypeName: datadog.PtrString(stackpulseSource),
 	}
 
-	ctx := context.WithValue(
-		context.Background(),
-		datadog.ContextAPIKeys,
-		map[string]datadog.APIKey{
-			"apiKeyAuth": {
-				Key: s.ApiKey,
-			},
-		},
-	)
-
+	ctx := datadog.NewDefaultContext(context.Background())
 	configuration := datadog.NewConfiguration()
 
 	// send request
 	apiClient := datadog.NewAPIClient(configuration)
 	resp, r, err := apiClient.EventsApi.CreateEvent(ctx).Body(body).Execute()
 	if err != nil {
-		if r.StatusCode != http.StatusAccepted {
-			return step.ExitCodeFailure, nil, fmt.Errorf("failed to create event. got response code: %d",
-				r.Status)
+		apiError, ok := err.(datadog.GenericOpenAPIError)
+		if ok && r != nil && r.StatusCode != http.StatusAccepted {
+			return step.ExitCodeFailure, nil, fmt.Errorf("failed to create event. got response code: %d %s",
+				r.StatusCode, apiError.Body())
 		} else {
 			return step.ExitCodeFailure, nil, err
 		}
