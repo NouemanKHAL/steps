@@ -7,15 +7,15 @@ metadata:
   type: notification
 
 envs:
-  - name: API_KEY
+  - name: DD_API_KEY
     description: "Datadog API key."
     type: "string"
     required: true
-  - name: USE_EU
-    description: "If false use the default US Datadog site, if true use the EU site (https://api.datadoghq.eu)."
-    type: "bool"
+  - name: DD_SITE
+    description: "Datadog destination site for the metrics, traces, and logs. Defaults to datadoghq.com."
+    type: "string"
     required: false
-    example: false
+    example: "us3.datadoghq.com"
   - name: TITLE
     description: "The event title. Limited to 100 characters."
     type: "string"
