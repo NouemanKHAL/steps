@@ -16,6 +16,8 @@ import (
 const stackpulseSource = "STACKPULSE"
 
 type EventPost struct {
+	ApiKey         string   `env:"DD_API_KEY,required"`
+	Site           string   `env:"DD_SITE"`
 	Title          string   `env:"TITLE,required"`
 	Text           string   `env:"TEXT,required"`
 	Tags           []string `env:"TAGS"`
